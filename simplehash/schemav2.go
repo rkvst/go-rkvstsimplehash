@@ -1,8 +1,6 @@
 package simplehash
 
 // Public go lang implementation of the simplehash RKVST event encoding scheme
-// This lives with the common api because it's job in life is to ensure stable
-// hashing of event data received by an api consumer
 
 import (
 	"crypto/sha256"
