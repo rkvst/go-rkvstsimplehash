@@ -6,16 +6,16 @@ import (
 	"hash"
 	"testing"
 
+	v2assets "github.com/datatrails/go-datatrails-common-api-gen/assets/v2/assets"
+	"github.com/datatrails/go-datatrails-common-api-gen/attribute/v2/attribute"
+	"github.com/datatrails/go-datatrails-common-api-gen/marshalers/simpleoneof"
 	"github.com/golang/protobuf/ptypes/timestamp"
-	v2assets "github.com/rkvst/go-rkvstcommon-api-gen/assets/v2/assets"
-	"github.com/rkvst/go-rkvstcommon-api-gen/attribute/v2/attribute"
-	"github.com/rkvst/go-rkvstcommon-api-gen/marshalers/simpleoneof"
 	"gotest.tools/v3/assert"
 )
 
 var (
 	// Note these events correspond to the VALID_EVENTS in
-	// https://github.com/rkvst/rkvst-simplehash-python/blob/main/unittests/constants.py
+	// https://github.com/datatrails/datatrails-simplehash-python/blob/main/unittests/constants.py
 	// @39ec71e744cf0cff44d2e60142308e0669687901
 
 	expectedHashAll = "61211c916cd113a1cf424ac729924de46aa6259919825dbdf8ec78c5c14665e2"

@@ -9,9 +9,10 @@ import (
 	"fmt"
 	"hash"
 
-	v2assets "github.com/rkvst/go-rkvstcommon-api-gen/assets/v2/assets"
-	"github.com/rkvst/go-rkvstcommon-api-gen/marshalers/simpleoneof"
+	v2assets "github.com/datatrails/go-datatrails-common-api-gen/assets/v2/assets"
+	"github.com/datatrails/go-datatrails-common-api-gen/marshalers/simpleoneof"
 	"github.com/zeebo/bencode"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var (
@@ -35,9 +36,27 @@ type HashOptions struct {
 	accumulateHash         bool
 	publicFromPermissioned bool
 	asConfirmed            bool
+	prefix                 []byte
+	committed              *timestamppb.Timestamp
 }
 
 type HashOption func(*HashOptions)
+
+// WithPrefix pre-pends the provided bytes to the hash. This option can be used
+// multiple times and the successive bytes are appended to the prefix. This is
+// typically used to provide hash domain seperation where second pre-image
+// collisions are a concerne.
+func WithPrefix(b []byte) HashOption {
+	return func(o *HashOptions) {
+		o.prefix = append(o.prefix, b...)
+	}
+}
+
+func WithTimestampCommitted(committed *timestamppb.Timestamp) HashOption {
+	return func(o *HashOptions) {
+		o.committed = committed
+	}
+}
 
 func WithAccumulate() HashOption {
 	return func(o *HashOptions) {
@@ -66,6 +85,11 @@ func (h *HasherV2) Reset() { h.hasher.Reset() }
 // format. GRPC endpoints are not presently exposed by the platform.
 //
 // Options:
+//   - WithTimestampCommitted set the timestamp_commited before hashing
+//   - WithPrefix is used to provide domain seperation, the provided bytes are
+//     pre-pended to the data to be hashed.  Eg H(prefix || data)
+//     This option can be used multiple times, the prefix bytes are appended to
+//     any previously supplied.
 //   - WithAccumulate callers wishing to implement batched hashing of multiple
 //     events in series should set this. They should call Reset() at their batch
 //     boundaries.
@@ -89,6 +113,10 @@ func (h *HasherV2) HashEvent(event *v2assets.EventResponse, opts ...HashOption) 
 		h.hasher.Reset()
 	}
 
+	if len(o.prefix) != 0 {
+		h.hasher.Write(o.prefix)
+	}
+
 	if o.publicFromPermissioned {
 		PublicFromPermissionedEvent(event)
 	}
@@ -98,6 +126,13 @@ func (h *HasherV2) HashEvent(event *v2assets.EventResponse, opts ...HashOption) 
 	// that is evidential and subject to public verification.
 	if o.asConfirmed {
 		event.ConfirmationStatus = v2assets.ConfirmationStatus_CONFIRMED
+	}
+
+	// force the commited time in the hash. only useful to the service that is
+	// actually doing the committing. public consumers only ever see confirmed
+	// events with the timestamp already in place.
+	if o.committed != nil {
+		event.TimestampCommitted = o.committed
 	}
 
 	// Note that we _don't_ take any notice of confirmation status.
