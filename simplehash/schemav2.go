@@ -1,6 +1,6 @@
 package simplehash
 
-// Public go lang implementation of the simplehash RKVST event encoding scheme
+// Public go lang implementation of the simplehash DataTrails event encoding scheme
 
 import (
 	"crypto/sha256"

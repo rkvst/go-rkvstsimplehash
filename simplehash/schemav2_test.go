@@ -52,13 +52,13 @@ var (
 				Issuer:      "https://rkvt.com",
 				Subject:     "117303158125148247777",
 				DisplayName: "William Defoe",
-				Email:       "WilliamDefoe@rkvst.com",
+				Email:       "WilliamDefoe@datatrails.ai",
 			},
 			PrincipalAccepted: &v2assets.Principal{
 				Issuer:      "https://rkvt.com",
 				Subject:     "117303158125148247777",
 				DisplayName: "William Defoe",
-				Email:       "WilliamDefoe@rkvst.com",
+				Email:       "WilliamDefoe@datatrails.ai",
 			},
 			ConfirmationStatus: v2assets.ConfirmationStatus_CONFIRMED,
 			From:               "0xf8dfc073650503aeD429E414bE7e972f8F095e70",
@@ -90,13 +90,13 @@ var (
 				Issuer:      "https://rkvt.com",
 				Subject:     "227303158125148248888",
 				DisplayName: "John Cena",
-				Email:       "JohnCena@rkvst.com",
+				Email:       "JohnCena@datatrails.ai",
 			},
 			PrincipalAccepted: &v2assets.Principal{
 				Issuer:      "https://rkvt.com",
 				Subject:     "227303158125148248888",
 				DisplayName: "John Cena",
-				Email:       "JohnCena@rkvst.com",
+				Email:       "JohnCena@datatrails.ai",
 			},
 			ConfirmationStatus: v2assets.ConfirmationStatus_CONFIRMED,
 			From:               "0xa453a973650503aeD429E414bE7e972f8F095f81",
@@ -119,7 +119,7 @@ func TestEventSimpleHashV2(t *testing.T) {
 		expectHash string
 	}{
 		// Note these events correspond to the VALID_EVENTS in
-		// https://github.com/rkvst/rkvst-simplehash-python/blob/main/unittests/constants.py
+		// https://github.com/datatrails/datatrails-simplehash-python/blob/main/unittests/constants.py
 		// @39ec71e744cf0cff44d2e60142308e0669687901
 		{
 			"VALID_EVENTS[0]",
