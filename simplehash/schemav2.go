@@ -12,7 +12,6 @@ import (
 	v2assets "github.com/datatrails/go-datatrails-common-api-gen/assets/v2/assets"
 	"github.com/datatrails/go-datatrails-common-api-gen/marshalers/simpleoneof"
 	"github.com/zeebo/bencode"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var (
@@ -30,50 +29,6 @@ func NewHasherV2() HasherV2 {
 		marshaler: NewEventMarshaler(),
 	}
 	return h
-}
-
-type HashOptions struct {
-	accumulateHash         bool
-	publicFromPermissioned bool
-	asConfirmed            bool
-	prefix                 []byte
-	committed              *timestamppb.Timestamp
-}
-
-type HashOption func(*HashOptions)
-
-// WithPrefix pre-pends the provided bytes to the hash. This option can be used
-// multiple times and the successive bytes are appended to the prefix. This is
-// typically used to provide hash domain seperation where second pre-image
-// collisions are a concerne.
-func WithPrefix(b []byte) HashOption {
-	return func(o *HashOptions) {
-		o.prefix = append(o.prefix, b...)
-	}
-}
-
-func WithTimestampCommitted(committed *timestamppb.Timestamp) HashOption {
-	return func(o *HashOptions) {
-		o.committed = committed
-	}
-}
-
-func WithAccumulate() HashOption {
-	return func(o *HashOptions) {
-		o.accumulateHash = true
-	}
-}
-
-func WithPublicFromPermissioned() HashOption {
-	return func(o *HashOptions) {
-		o.publicFromPermissioned = true
-	}
-}
-
-func WithAsConfirmed() HashOption {
-	return func(o *HashOptions) {
-		o.asConfirmed = true
-	}
 }
 
 // Reset resets the hasher state
@@ -142,6 +97,11 @@ func (h *HasherV2) HashEvent(event *v2assets.EventResponse, opts ...HashOption) 
 		return err
 	}
 
+	// If the idcommitted is provided, add it to the hash first
+	if o.idcommitted != nil {
+		h.hasher.Write(o.idcommitted)
+	}
+
 	return V2HashEvent(h.hasher, v2Event)
 }
 
@@ -187,6 +147,12 @@ func (h *HasherV2) HashEventJSON(event []byte, opts ...HashOption) error {
 		// correct one.
 		v2Event.ConfirmationStatus = v2assets.ConfirmationStatus_name[int32(v2assets.ConfirmationStatus_CONFIRMED)]
 	}
+
+	// If the idcommitted is provided, add it to the hash first
+	if o.idcommitted != nil {
+		h.hasher.Write(o.idcommitted)
+	}
+
 	return V2HashEvent(h.hasher, v2Event)
 }
 
