@@ -4,7 +4,6 @@ package simplehash
 
 import (
 	"crypto/sha256"
-	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,7 +12,6 @@ import (
 	v2assets "github.com/datatrails/go-datatrails-common-api-gen/assets/v2/assets"
 	"github.com/datatrails/go-datatrails-common-api-gen/marshalers/simpleoneof"
 	"github.com/zeebo/bencode"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var (
@@ -31,60 +29,6 @@ func NewHasherV2() HasherV2 {
 		marshaler: NewEventMarshaler(),
 	}
 	return h
-}
-
-type HashOptions struct {
-	accumulateHash         bool
-	publicFromPermissioned bool
-	asConfirmed            bool
-	prefix                 []byte
-	committed              *timestamppb.Timestamp
-	idcommitted            []byte
-}
-
-type HashOption func(*HashOptions)
-
-// WithIDCommitted includes the snowflakeid unique commitment timestamp in the hash
-// idcommitted is never (legitimately) zero
-func WithIDCommitted(idcommitted uint64) HashOption {
-	return func(o *HashOptions) {
-		o.idcommitted = make([]byte, 8)
-		binary.BigEndian.PutUint64(o.idcommitted, idcommitted)
-	}
-}
-
-// WithPrefix pre-pends the provided bytes to the hash. This option can be used
-// multiple times and the successive bytes are appended to the prefix. This is
-// typically used to provide hash domain seperation where second pre-image
-// collisions are a concerne.
-func WithPrefix(b []byte) HashOption {
-	return func(o *HashOptions) {
-		o.prefix = append(o.prefix, b...)
-	}
-}
-
-func WithTimestampCommitted(committed *timestamppb.Timestamp) HashOption {
-	return func(o *HashOptions) {
-		o.committed = committed
-	}
-}
-
-func WithAccumulate() HashOption {
-	return func(o *HashOptions) {
-		o.accumulateHash = true
-	}
-}
-
-func WithPublicFromPermissioned() HashOption {
-	return func(o *HashOptions) {
-		o.publicFromPermissioned = true
-	}
-}
-
-func WithAsConfirmed() HashOption {
-	return func(o *HashOptions) {
-		o.asConfirmed = true
-	}
 }
 
 // Reset resets the hasher state
