@@ -4,6 +4,7 @@ package simplehash
 
 import (
 	"crypto/sha256"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -38,9 +39,19 @@ type HashOptions struct {
 	asConfirmed            bool
 	prefix                 []byte
 	committed              *timestamppb.Timestamp
+	idcommitted            []byte
 }
 
 type HashOption func(*HashOptions)
+
+// WithIDCommitted includes the snowflakeid unique commitment timestamp in the hash
+// idcommitted is never (legitimately) zero
+func WithIDCommitted(idcommitted uint64) HashOption {
+	return func(o *HashOptions) {
+		o.idcommitted = make([]byte, 8)
+		binary.BigEndian.PutUint64(o.idcommitted, idcommitted)
+	}
+}
 
 // WithPrefix pre-pends the provided bytes to the hash. This option can be used
 // multiple times and the successive bytes are appended to the prefix. This is
@@ -142,6 +153,11 @@ func (h *HasherV2) HashEvent(event *v2assets.EventResponse, opts ...HashOption) 
 		return err
 	}
 
+	// If the idcommitted is provided, add it to the hash first
+	if o.idcommitted != nil {
+		h.hasher.Write(o.idcommitted)
+	}
+
 	return V2HashEvent(h.hasher, v2Event)
 }
 
@@ -187,6 +203,12 @@ func (h *HasherV2) HashEventJSON(event []byte, opts ...HashOption) error {
 		// correct one.
 		v2Event.ConfirmationStatus = v2assets.ConfirmationStatus_name[int32(v2assets.ConfirmationStatus_CONFIRMED)]
 	}
+
+	// If the idcommitted is provided, add it to the hash first
+	if o.idcommitted != nil {
+		h.hasher.Write(o.idcommitted)
+	}
+
 	return V2HashEvent(h.hasher, v2Event)
 }
 
