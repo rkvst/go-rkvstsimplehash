@@ -50,10 +50,11 @@ func (h *HasherV2) Reset() { h.hasher.Reset() }
 //     boundaries.
 //   - WithPublicFromPermissioned should be set if the event is the
 //     permissioned (owner) counter part of a public attestation.
-//   - WithAsConfirmed should be set if the caller is implementing CONFIRMATION
-//     as part of an evidence subsystem implementation. The expectation is that
-//     the caller has a PENDING record to hand, and is in the process of
-//     creating the CONFIRMED record. It is the CONFIRMED record that needs to
+//   - WithAsCommitted should be set if the caller is implementing COMMITMENT
+//     trust level as part of an evidence subsystem implementation. The
+//     expectation is that the caller has a STORED record to hand, and is in
+//     the process of creating the COMMITTED record. It is the COMMITTED record
+//     that needs to
 //     be publicly verifiable.
 func (h *HasherV2) HashEvent(event *v2assets.EventResponse, opts ...HashOption) error {
 	o := HashOptions{}
@@ -79,8 +80,8 @@ func (h *HasherV2) HashEvent(event *v2assets.EventResponse, opts ...HashOption) 
 	// If the caller is responsible for evidence confirmation they will have a
 	// pending event in their hand. But ultimately it is the confirmed record
 	// that is evidential and subject to public verification.
-	if o.asConfirmed {
-		event.ConfirmationStatus = v2assets.ConfirmationStatus_CONFIRMED
+	if o.asCommitted {
+		event.ConfirmationStatus = v2assets.ConfirmationStatus_COMMITTED
 	}
 
 	// force the commited time in the hash. only useful to the service that is
@@ -141,7 +142,7 @@ func (h *HasherV2) HashEventJSON(event []byte, opts ...HashOption) error {
 	// If the caller is responsible for evidence confirmation they will have a
 	// pending event in their hand. But ultimately it is the confirmed record
 	// that is evidential and subject to public verification.
-	if o.asConfirmed {
+	if o.asCommitted {
 		// TODO: This probably is also not legit for an api consumer, but it
 		// does let the customer *anticipate* the hash and check we produce the
 		// correct one.
