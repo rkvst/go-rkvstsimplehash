@@ -38,7 +38,7 @@ tasks:
         goimports {{.VERBOSE}} -w .
         golangci-lint {{.VERBOSE}} run --timeout 10m ./...
 
-  unit-tests:
+  test:
     desc: "run unit tests"
     cmds:
       - go test {{.GO_TEST_TAGS}} ./...

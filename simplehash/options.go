@@ -2,6 +2,7 @@ package simplehash
 
 import (
 	"encoding/binary"
+	"errors"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -12,13 +13,16 @@ import (
 type HashOptions struct {
 	accumulateHash         bool
 	publicFromPermissioned bool
-	asConfirmed            bool
 	prefix                 []byte
 	committed              *timestamppb.Timestamp
 	idcommitted            []byte
 }
 
 type HashOption func(*HashOptions)
+
+var (
+	ErrInvalidOption = errors.New("option not supported by this method")
+)
 
 // WithIDCommitted includes the snowflakeid unique commitment timestamp in the hash
 // idcommitted is never (legitimately) zero
@@ -54,11 +58,5 @@ func WithAccumulate() HashOption {
 func WithPublicFromPermissioned() HashOption {
 	return func(o *HashOptions) {
 		o.publicFromPermissioned = true
-	}
-}
-
-func WithAsConfirmed() HashOption {
-	return func(o *HashOptions) {
-		o.asConfirmed = true
 	}
 }
