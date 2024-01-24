@@ -43,21 +43,6 @@ func TestHasherV3_HashEvent(t *testing.T) {
 			false,
 			expectedHashAllV3,
 		},
-		{
-			"confirmation_status not supported",
-			fields{
-				Hasher: Hasher{
-					sha256.New(),
-					NewEventMarshaler(),
-				},
-			},
-			args{
-				validEventsV2,
-				[]HashOption{WithAsCommitted()},
-			},
-			true,
-			"",
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -110,10 +110,6 @@ func (h *HasherV3) HashEvent(event *v2assets.EventResponse, opts ...HashOption) 
 		opt(&o)
 	}
 
-	if o.asCommitted {
-		return fmt.Errorf("the v3 schema does not include confirmation_status: %w", ErrInvalidOption)
-	}
-
 	h.applyEventOptions(o, event)
 
 	v3Event, err := V3FromEventResponse(h.marshaler, event)

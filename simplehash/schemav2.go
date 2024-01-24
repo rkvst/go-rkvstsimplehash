@@ -69,25 +69,7 @@ func (h *HasherV2) HashEvent(event *v2assets.EventResponse, opts ...HashOption) 
 		opt(&o)
 	}
 
-	var err error
-
-	if o.publicFromPermissioned {
-		PublicFromPermissionedEvent(event)
-	}
-
-	// If the caller is responsible for evidence confirmation they will have a
-	// pending event in their hand. But ultimately it is the confirmed record
-	// that is evidential and subject to public verification.
-	if o.asCommitted {
-		event.ConfirmationStatus = v2assets.ConfirmationStatus_COMMITTED
-	}
-
-	// force the commited time in the hash. only useful to the service that is
-	// actually doing the committing. public consumers only ever see confirmed
-	// events with the timestamp already in place.
-	if o.committed != nil {
-		event.TimestampCommitted = o.committed
-	}
+	h.Hasher.applyEventOptions(o, event)
 
 	// Note that we _don't_ take any notice of confirmation status.
 
@@ -97,23 +79,7 @@ func (h *HasherV2) HashEvent(event *v2assets.EventResponse, opts ...HashOption) 
 	}
 
 	// Hash data accumulation starts here
-
-	// By default, one hash at at time with a reset.
-	if !o.accumulateHash {
-		h.hasher.Reset()
-	}
-
-	// If the prefix is provided it must be first.
-	if len(o.prefix) != 0 {
-		h.hasher.Write(o.prefix)
-	}
-
-	// If the idcommitted is provided, add it to the hash immediately before the
-	// event data.
-
-	if o.idcommitted != nil {
-		h.hasher.Write(o.idcommitted)
-	}
+	h.Hasher.applyHashingOptions(o)
 
 	return V2HashEvent(h.hasher, v2Event)
 }
@@ -133,14 +99,6 @@ func (h *HasherV2) HashEventJSON(event []byte, opts ...HashOption) error {
 	for _, opt := range opts {
 		opt(&o)
 	}
-
-	var err error
-
-	// By default, one hash at at time with a reset.
-	if !o.accumulateHash {
-		h.Reset()
-	}
-
 	if o.publicFromPermissioned {
 		// It is api response data, so the details of protected vs public should already have been dealt with.
 		return ErrInvalidOption
@@ -151,20 +109,7 @@ func (h *HasherV2) HashEventJSON(event []byte, opts ...HashOption) error {
 		return err
 	}
 
-	// If the caller is responsible for evidence confirmation they will have a
-	// pending event in their hand. But ultimately it is the confirmed record
-	// that is evidential and subject to public verification.
-	if o.asCommitted {
-		// TODO: This probably is also not legit for an api consumer, but it
-		// does let the customer *anticipate* the hash and check we produce the
-		// correct one.
-		v2Event.ConfirmationStatus = v2assets.ConfirmationStatus_name[int32(v2assets.ConfirmationStatus_CONFIRMED)]
-	}
-
-	// If the idcommitted is provided, add it to the hash first
-	if o.idcommitted != nil {
-		h.hasher.Write(o.idcommitted)
-	}
+	h.Hasher.applyHashingOptions(o)
 
 	return V2HashEvent(h.hasher, v2Event)
 }

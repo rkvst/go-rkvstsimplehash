@@ -41,13 +41,6 @@ func (h *Hasher) applyEventOptions(o HashOptions, event *v2assets.EventResponse)
 		PublicFromPermissionedEvent(event)
 	}
 
-	// If the caller is responsible for evidence confirmation they will have a
-	// pending event in their hand. But ultimately it is the confirmed record
-	// that is evidential and subject to public verification.
-	if o.asCommitted {
-		event.ConfirmationStatus = v2assets.ConfirmationStatus_COMMITTED
-	}
-
 	// force the commited time in the hash. only useful to the service that is
 	// actually doing the committing. public consumers only ever see confirmed
 	// events with the timestamp already in place.

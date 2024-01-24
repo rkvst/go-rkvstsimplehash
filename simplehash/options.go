@@ -13,7 +13,6 @@ import (
 type HashOptions struct {
 	accumulateHash         bool
 	publicFromPermissioned bool
-	asCommitted            bool
 	prefix                 []byte
 	committed              *timestamppb.Timestamp
 	idcommitted            []byte
@@ -59,11 +58,5 @@ func WithAccumulate() HashOption {
 func WithPublicFromPermissioned() HashOption {
 	return func(o *HashOptions) {
 		o.publicFromPermissioned = true
-	}
-}
-
-func WithAsCommitted() HashOption {
-	return func(o *HashOptions) {
-		o.asCommitted = true
 	}
 }
