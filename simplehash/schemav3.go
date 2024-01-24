@@ -10,7 +10,7 @@ import (
 	"github.com/zeebo/bencode"
 )
 
-// V3Event is a struct that contains ONLY the event fields we want to hash for schema v2
+// V3Event is a struct that contains ONLY the event fields we want to hash for schema v3
 type V3Event struct {
 	Identity           string         `json:"identity"`
 	EventAttributes    map[string]any `json:"event_attributes"`
