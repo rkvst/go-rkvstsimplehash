@@ -22,12 +22,18 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           cache-dependency-path: |
             datatrails-common-api/go.sum
+
+      - name: Install Go quality tools
+        run: |
+          go install golang.org/x/tools/cmd/goimports@latest
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "${PWD}/bin" v1.55.2
+
       - name: Code Quality 
         run: |
           # Note: it is by design that we don't use the builder
           task codeqa
+
       - name: Test
         run: |
           # Note: it is by design that we don't use the builder
           task test
-
