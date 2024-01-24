@@ -23,7 +23,7 @@ includes:
 
 tasks:
 
-  qa-basic:
+  codeqa:
     desc: |
       format the source and run all the quality checks
       (Does not run unit tests)
@@ -39,4 +39,4 @@ tasks:
   test:
     desc: run the tests
     cmds:
-      - task: codeqa:unit-tests
+      - task: codeqa:test

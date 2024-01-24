@@ -2,6 +2,7 @@ package simplehash
 
 import (
 	"encoding/binary"
+	"errors"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -19,6 +20,10 @@ type HashOptions struct {
 }
 
 type HashOption func(*HashOptions)
+
+var (
+	ErrInvalidOption = errors.New("option not supported by this method")
+)
 
 // WithIDCommitted includes the snowflakeid unique commitment timestamp in the hash
 // idcommitted is never (legitimately) zero
