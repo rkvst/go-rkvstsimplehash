@@ -6,7 +6,7 @@ on:
 
 jobs:
   test:
-    name: Build and Release
+    name: Code quality and unit tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,6 +27,7 @@ jobs:
         run: |
           go install golang.org/x/tools/cmd/goimports@latest
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "${PWD}/bin" v1.55.2
+          echo "${PWD}/bin" >> $GITHUB_PATH
 
       - name: Code Quality 
         run: |
