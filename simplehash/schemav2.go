@@ -57,11 +57,6 @@ func NewHasherV2() HasherV2 {
 //     boundaries.
 //   - WithPublicFromPermissioned should be set if the event is the
 //     permissioned (owner) counter part of a public attestation.
-//   - WithAsCommitted should be set if the caller is implementing COMMITMENT
-//     trust level as part of an evidence subsystem implementation. The
-//     expectation is that the caller has a STORED record to hand, and is in
-//     the process of creating the COMMITTED record. It is the COMMITTED record
-//     that needs to
 //     be publicly verifiable.
 func (h *HasherV2) HashEvent(event *v2assets.EventResponse, opts ...HashOption) error {
 	o := HashOptions{}
