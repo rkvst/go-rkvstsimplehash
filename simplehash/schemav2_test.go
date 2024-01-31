@@ -5,11 +5,13 @@ import (
 	"encoding/hex"
 	"hash"
 	"testing"
+	"time"
 
 	v2assets "github.com/datatrails/go-datatrails-common-api-gen/assets/v2/assets"
 	"github.com/datatrails/go-datatrails-common-api-gen/attribute/v2/attribute"
 	"github.com/datatrails/go-datatrails-common-api-gen/marshalers/simpleoneof"
 	"github.com/golang/protobuf/ptypes/timestamp"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"gotest.tools/v3/assert"
 )
 
@@ -113,6 +115,41 @@ var (
 		// "19111226f169ee67b41265aa27dc3792bf10ca463bc873361cae27d7e1bd6786",
 	}
 )
+
+// TestV2Event_SetTimestampCommitted tests:
+//
+// 1. setting the timestamp gives the correctly formatted timestamp in the v2event
+func TestV2Event_SetTimestampCommitted(t *testing.T) {
+	type args struct {
+		timestamp *timestamppb.Timestamp
+	}
+	tests := []struct {
+		name              string
+		originalTimestamp string
+		args              args
+		expected          string
+	}{
+		{
+			name:              "positive",
+			originalTimestamp: "2023-02-23T10:11:08.761Z",
+			args: args{
+				timestamp: timestamppb.New(time.Unix(1706700559, 43000000)),
+			},
+			expected: "2024-01-31T11:29:19.043Z",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			e := &V2Event{
+				TimestampCommitted: test.originalTimestamp,
+			}
+
+			e.SetTimestampCommitted(test.args.timestamp)
+
+			assert.Equal(t, test.expected, e.TimestampCommitted)
+		})
+	}
+}
 
 func TestEventSimpleHashV2(t *testing.T) {
 	type args struct {
@@ -265,6 +302,44 @@ func TestHasherV2_HashEventJSON(t *testing.T) {
 			}
 			actualHash := hex.EncodeToString(h.Sum())
 			assert.Equal(t, tt.expectedHash, actualHash)
+		})
+	}
+}
+
+// TestV2Event_ToPublicIdentity tests:
+//
+// 1. that both identity and asset identity convert correctly to the public identity.
+func TestV2Event_ToPublicIdentity(t *testing.T) {
+	type fields struct {
+		Identity      string
+		AssetIdentity string
+	}
+	tests := []struct {
+		name           string
+		fields         fields
+		eIdentity      string
+		eAssetIdentity string
+	}{
+		{
+			name: "positive",
+			fields: fields{
+				Identity:      "assets/9ccdc19b-44a1-434c-afab-14f8eac3405c/events/e76a03d1-19a5-4f11-bcaf-383bb4f1dfd4",
+				AssetIdentity: "assets/9ccdc19b-44a1-434c-afab-14f8eac3405c",
+			},
+			eIdentity:      "publicassets/9ccdc19b-44a1-434c-afab-14f8eac3405c/events/e76a03d1-19a5-4f11-bcaf-383bb4f1dfd4",
+			eAssetIdentity: "publicassets/9ccdc19b-44a1-434c-afab-14f8eac3405c",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			e := &V2Event{
+				Identity:      test.fields.Identity,
+				AssetIdentity: test.fields.AssetIdentity,
+			}
+			e.ToPublicIdentity()
+
+			assert.Equal(t, test.eIdentity, e.Identity)
+			assert.Equal(t, test.eAssetIdentity, e.AssetIdentity)
 		})
 	}
 }

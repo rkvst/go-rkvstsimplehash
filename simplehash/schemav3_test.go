@@ -4,8 +4,10 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"testing"
+	"time"
 
 	v2assets "github.com/datatrails/go-datatrails-common-api-gen/assets/v2/assets"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"gotest.tools/v3/assert"
 )
 
@@ -59,6 +61,73 @@ func TestHasherV3_HashEvent(t *testing.T) {
 			}
 			actualHash := hex.EncodeToString(h.Hasher.Sum(nil))
 			assert.Equal(t, tt.expectedHash, actualHash)
+		})
+	}
+}
+
+// TestV3Event_SetTimestampCommitted tests:
+//
+// 1. setting the timestamp gives the correctly formatted timestamp in the v3event
+func TestV3Event_SetTimestampCommitted(t *testing.T) {
+	type args struct {
+		timestamp *timestamppb.Timestamp
+	}
+	tests := []struct {
+		name              string
+		originalTimestamp string
+		args              args
+		expected          string
+	}{
+		{
+			name:              "positive",
+			originalTimestamp: "2023-02-23T10:11:08.761Z",
+			args: args{
+				timestamp: timestamppb.New(time.Unix(1706700559, 43000000)),
+			},
+			expected: "2024-01-31T11:29:19.043Z",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			e := &V3Event{
+				TimestampCommitted: test.originalTimestamp,
+			}
+
+			e.SetTimestampCommitted(test.args.timestamp)
+
+			assert.Equal(t, test.expected, e.TimestampCommitted)
+		})
+	}
+}
+
+// TestV3Event_ToPublicIdentity tests:
+//
+// 1. that identity convert correctly to the public identity.
+func TestV3Event_ToPublicIdentity(t *testing.T) {
+	type fields struct {
+		Identity string
+	}
+	tests := []struct {
+		name      string
+		fields    fields
+		eIdentity string
+	}{
+		{
+			name: "positive",
+			fields: fields{
+				Identity: "assets/9ccdc19b-44a1-434c-afab-14f8eac3405c/events/e76a03d1-19a5-4f11-bcaf-383bb4f1dfd4",
+			},
+			eIdentity: "publicassets/9ccdc19b-44a1-434c-afab-14f8eac3405c/events/e76a03d1-19a5-4f11-bcaf-383bb4f1dfd4",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			e := &V2Event{
+				Identity: test.fields.Identity,
+			}
+			e.ToPublicIdentity()
+
+			assert.Equal(t, test.eIdentity, e.Identity)
 		})
 	}
 }

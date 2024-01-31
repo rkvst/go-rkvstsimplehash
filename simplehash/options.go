@@ -10,6 +10,11 @@ import (
 // These options are not part of the event schema. The can be used to adjust how
 // the schema is applied to produce a hash for  different purposes.
 
+type EventOptionApplier interface {
+	ToPublicIdentity()
+	SetTimestampCommitted(*timestamppb.Timestamp)
+}
+
 type HashOptions struct {
 	accumulateHash         bool
 	publicFromPermissioned bool

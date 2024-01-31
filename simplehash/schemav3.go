@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"hash"
+	"time"
 
 	v2assets "github.com/datatrails/go-datatrails-common-api-gen/assets/v2/assets"
 	"github.com/datatrails/go-datatrails-common-api-gen/marshalers/simpleoneof"
 	"github.com/zeebo/bencode"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // V3Event is a struct that contains ONLY the event fields we want to hash for schema v3
@@ -23,6 +25,16 @@ type V3Event struct {
 	PrincipalAccepted  map[string]any `json:"principal_accepted"`
 	PrincipalDeclared  map[string]any `json:"principal_declared"`
 	TenantIdentity     string         `json:"tenant_identity"`
+}
+
+// ToPublicIdentity converts the identity of the event into a public identity
+func (e *V3Event) ToPublicIdentity() {
+	e.Identity = v2assets.PublicIdentityFromPermissioned(e.Identity)
+}
+
+// SetTimestampCommitted sets the timestamp committed to the given timestamp
+func (e *V3Event) SetTimestampCommitted(timestamp *timestamppb.Timestamp) {
+	e.TimestampCommitted = timestamp.AsTime().Format(time.RFC3339Nano)
 }
 
 func V3HashEvent(hasher hash.Hash, v3Event V3Event) error {
@@ -110,12 +122,46 @@ func (h *HasherV3) HashEvent(event *v2assets.EventResponse, opts ...HashOption) 
 		opt(&o)
 	}
 
-	h.applyEventOptions(o, event)
-
 	v3Event, err := V3FromEventResponse(h.marshaler, event)
 	if err != nil {
 		return err
 	}
+
+	h.applyEventOptions(o, &v3Event)
+
+	h.applyHashingOptions(o)
+
+	return V3HashEvent(h.hasher, v3Event)
+}
+
+// HashEventFromJson hashes a single event according to the canonical simple hash event
+// format available to api consumers. The source event is in json format.
+//
+// Options:
+//   - WithIDCommitted prefix the data to hash with the bigendian encoding of
+//     idtimestamp before hashing.
+//   - WithPrefix is used to provide domain separation, the provided bytes are
+//     pre-pended to the data to be hashed.  Eg H(prefix || data)
+//     This option can be used multiple times, the prefix bytes are appended to
+//     any previously supplied.
+//   - WithAccumulate callers wishing to implement batched hashing of multiple
+//     events in series should set this. They should call Reset() at their batch
+//     boundaries.
+//   - WithPublicFromPermissioned should be set if the event is the
+//     permissioned (owner) counter part of a public attestation.
+func (h *HasherV3) HashEventFromJSON(eventJson []byte, opts ...HashOption) error {
+
+	o := HashOptions{}
+	for _, opt := range opts {
+		opt(&o)
+	}
+
+	v3Event, err := V3FromEventJSON(eventJson)
+	if err != nil {
+		return err
+	}
+
+	h.applyEventOptions(o, &v3Event)
 
 	h.applyHashingOptions(o)
 

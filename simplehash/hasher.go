@@ -36,16 +36,16 @@ func NewEventMarshaler() *simpleoneof.Marshaler {
 	return v2assets.NewFlatMarshalerForEvents()
 }
 
-func (h *Hasher) applyEventOptions(o HashOptions, event *v2assets.EventResponse) {
+func (h *Hasher) applyEventOptions(o HashOptions, event EventOptionApplier) {
 	if o.publicFromPermissioned {
-		PublicFromPermissionedEvent(event)
+		event.ToPublicIdentity()
 	}
 
 	// force the commited time in the hash. only useful to the service that is
 	// actually doing the committing. public consumers only ever see confirmed
 	// events with the timestamp already in place.
 	if o.committed != nil {
-		event.TimestampCommitted = o.committed
+		event.SetTimestampCommitted(o.committed)
 	}
 }
 
