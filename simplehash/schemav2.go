@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"hash"
+	"time"
 
 	v2assets "github.com/datatrails/go-datatrails-common-api-gen/assets/v2/assets"
 	"github.com/datatrails/go-datatrails-common-api-gen/marshalers/simpleoneof"
 	"github.com/zeebo/bencode"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // V2Event is a struct that contains ONLY the event fields we want to hash for schema v2
@@ -28,6 +30,17 @@ type V2Event struct {
 	ConfirmationStatus string         `json:"confirmation_status"`
 	From               string         `json:"from"`
 	TenantIdentity     string         `json:"tenant_identity"`
+}
+
+// ToPublicIdentity converts the identity of the event into a public identity
+func (e *V2Event) ToPublicIdentity() {
+	e.AssetIdentity = v2assets.PublicIdentityFromPermissioned(e.AssetIdentity)
+	e.Identity = v2assets.PublicIdentityFromPermissioned(e.Identity)
+}
+
+// SetTimestampCommitted sets the timestamp committed to the given timestamp
+func (e *V2Event) SetTimestampCommitted(timestamp *timestamppb.Timestamp) {
+	e.TimestampCommitted = timestamp.AsTime().Format(time.RFC3339Nano)
 }
 
 type HasherV2 struct {
@@ -64,14 +77,14 @@ func (h *HasherV2) HashEvent(event *v2assets.EventResponse, opts ...HashOption) 
 		opt(&o)
 	}
 
-	h.Hasher.applyEventOptions(o, event)
-
 	// Note that we _don't_ take any notice of confirmation status.
 
 	v2Event, err := V2FromEventResponse(h.marshaler, event)
 	if err != nil {
 		return err
 	}
+
+	h.Hasher.applyEventOptions(o, &v2Event)
 
 	// Hash data accumulation starts here
 	h.Hasher.applyHashingOptions(o)
