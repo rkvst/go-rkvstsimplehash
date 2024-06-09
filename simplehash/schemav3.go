@@ -167,3 +167,20 @@ func (h *HasherV3) HashEventFromJSON(eventJson []byte, opts ...HashOption) error
 
 	return V3HashEvent(h.hasher, v3Event)
 }
+
+// HashEventFromV3 hashes a single event according to the canonical simple hash event
+// format available to api consumers. The source event a pre decoded V3Event type
+// Options: same as HashEventFromJSON
+func (h *HasherV3) HashEventFromV3(v3Event V3Event, opts ...HashOption) error {
+
+	o := HashOptions{}
+	for _, opt := range opts {
+		opt(&o)
+	}
+
+	h.applyEventOptions(o, &v3Event)
+
+	h.applyHashingOptions(o)
+
+	return V3HashEvent(h.hasher, v3Event)
+}
