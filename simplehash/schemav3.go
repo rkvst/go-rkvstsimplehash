@@ -86,10 +86,15 @@ func V3FromEventJSON(eventJson []byte) (V3Event, error) {
 	if err != nil {
 		return V3Event{}, err
 	}
+
+	// change all instances of public identities to permissioned identities
+	// we only use permissioned identities as part of the v3 hash schema
+	eventShashV3.Identity = v2assets.PermissionedIdentityFromPublic(eventShashV3.Identity)
+
 	return eventShashV3, nil
 }
 
-// V2FromEventResponse transforms a single event in grpc proto format (message bus
+// V3FromEventResponse transforms a single event in grpc proto format (message bus
 // compatible) to the canonical, publicly verifiable, api format.
 func V3FromEventResponse(marshaler *simpleoneof.Marshaler, event *v2assets.EventResponse) (V3Event, error) {
 	eventJson, err := marshaler.Marshal(event)
@@ -115,6 +120,7 @@ func V3FromEventResponse(marshaler *simpleoneof.Marshaler, event *v2assets.Event
 //     boundaries.
 //   - WithPublicFromPermissioned should be set if the event is the
 //     permissioned (owner) counter part of a public attestation.
+//     NOTE: should not be used for valid v3 schema
 func (h *HasherV3) HashEvent(event *v2assets.EventResponse, opts ...HashOption) error {
 
 	o := HashOptions{}
@@ -149,6 +155,7 @@ func (h *HasherV3) HashEvent(event *v2assets.EventResponse, opts ...HashOption) 
 //     boundaries.
 //   - WithPublicFromPermissioned should be set if the event is the
 //     permissioned (owner) counter part of a public attestation.
+//     NOTE: should not be used for valid v3 schema
 func (h *HasherV3) HashEventFromJSON(eventJson []byte, opts ...HashOption) error {
 
 	o := HashOptions{}
