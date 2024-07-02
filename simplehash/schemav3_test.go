@@ -181,7 +181,7 @@ func TestV3FromEventJSON(t *testing.T) {
 //
 // 1. permissioned event is correctly interpretted into a v3event.
 // 2. public event is correctly interpretted into a v3event.
-func TestV3FromEventResponse(t *testing.T) {
+func TestV3FromEventResponse_ConvertsPublicIdentityToPermissioned(t *testing.T) {
 	type args struct {
 		event *v2assets.EventResponse
 	}
