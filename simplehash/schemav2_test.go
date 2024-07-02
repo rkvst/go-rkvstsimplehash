@@ -11,8 +11,8 @@ import (
 	"github.com/datatrails/go-datatrails-common-api-gen/attribute/v2/attribute"
 	"github.com/datatrails/go-datatrails-common-api-gen/marshalers/simpleoneof"
 	"github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"gotest.tools/v3/assert"
 )
 
 var (

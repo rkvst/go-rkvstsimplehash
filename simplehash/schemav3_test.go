@@ -7,8 +7,8 @@ import (
 	"time"
 
 	v2assets "github.com/datatrails/go-datatrails-common-api-gen/assets/v2/assets"
+	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"gotest.tools/v3/assert"
 )
 
 var (
@@ -128,6 +128,96 @@ func TestV3Event_ToPublicIdentity(t *testing.T) {
 			e.ToPublicIdentity()
 
 			assert.Equal(t, test.eIdentity, e.Identity)
+		})
+	}
+}
+
+// TestV3FromEventJSON tests:
+//
+// 1. permissioned event is correctly interpretted into a v3event.
+// 2. public event is correctly interpretted into a v3event.
+func TestV3FromEventJSON(t *testing.T) {
+	type args struct {
+		eventJson []byte
+	}
+	tests := []struct {
+		name     string
+		args     args
+		expected V3Event
+		err      error
+	}{
+		{
+			name: "positive permissioned",
+			args: args{
+				eventJson: []byte(`{"identity":"assets/1234/events/5678"}`),
+			},
+			expected: V3Event{
+				Identity: "assets/1234/events/5678",
+			},
+			err: nil,
+		},
+		{
+			name: "positive public",
+			args: args{
+				eventJson: []byte(`{"identity":"publicassets/1234/events/5678"}`),
+			},
+			expected: V3Event{
+				Identity: "assets/1234/events/5678",
+			},
+			err: nil,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			actual, err := V3FromEventJSON(test.args.eventJson)
+
+			assert.Equal(t, test.err, err)
+			assert.Equal(t, test.expected, actual)
+		})
+	}
+}
+
+// TestV3FromEventResponse tests:
+//
+// 1. permissioned event is correctly interpretted into a v3event.
+// 2. public event is correctly interpretted into a v3event.
+func TestV3FromEventResponse_ConvertsPublicIdentityToPermissioned(t *testing.T) {
+	type args struct {
+		event *v2assets.EventResponse
+	}
+	tests := []struct {
+		name     string
+		args     args
+		expected V3Event
+		err      error
+	}{
+		{
+			name: "positive permissioned",
+			args: args{
+				event: &v2assets.EventResponse{Identity: "assets/1234/events/5678"},
+			},
+			expected: V3Event{
+				Identity: "assets/1234/events/5678",
+			},
+			err: nil,
+		},
+		{
+			name: "positive public",
+			args: args{
+				event: &v2assets.EventResponse{Identity: "publicassets/1234/events/5678"},
+			},
+			expected: V3Event{
+				Identity: "assets/1234/events/5678",
+			},
+			err: nil,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			actual, err := V3FromEventResponse(NewEventMarshaler(), test.args.event)
+
+			assert.Equal(t, test.err, err)
+			assert.Equal(t, test.expected.Identity, actual.Identity)
 		})
 	}
 }
