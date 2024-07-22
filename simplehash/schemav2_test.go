@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	v2assets "github.com/datatrails/go-datatrails-common-api-gen/assets/v2/assets"
-	"github.com/datatrails/go-datatrails-common-api-gen/attribute/v2/attribute"
-	"github.com/datatrails/go-datatrails-common-api-gen/marshalers/simpleoneof"
+	v2assets "github.com/datatrails/go-datatrails-api/assets/v2/assets"
+	"github.com/datatrails/go-datatrails-api/attribute/v2/attribute"
+	"github.com/datatrails/go-datatrails-api/marshalers/simpleoneof"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -64,15 +64,7 @@ var (
 			ConfirmationStatus: v2assets.ConfirmationStatus_CONFIRMED,
 			From:               "0xf8dfc073650503aeD429E414bE7e972f8F095e70",
 			TenantIdentity:     "tenant/0684984b-654d-4301-ad10-a508126e187d",
-			MerklelogEntry: &v2assets.MerkleLogEntry{
-				LogVersion: 1,
-				LogEpoch:   2,
-				Commit: &v2assets.MerkleLogCommitMongoDB{
-					LeafIndex:   1,
-					Index:       2,
-					Idtimestamp: "0xff00ff00ff",
-				},
-			},
+			MerklelogEntry:     &v2assets.MerkleLogEntry{},
 		},
 		{
 			Identity:      "assets/a987b910-f567-4cca-9869-bbbeb12aec20/events/936ba508-ee65-426d-8903-52c59cb4655b",

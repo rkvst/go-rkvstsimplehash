@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	v2assets "github.com/datatrails/go-datatrails-common-api-gen/assets/v2/assets"
+	v2assets "github.com/datatrails/go-datatrails-api/assets/v2/assets"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

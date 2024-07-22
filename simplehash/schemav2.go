@@ -8,8 +8,8 @@ import (
 	"hash"
 	"time"
 
-	v2assets "github.com/datatrails/go-datatrails-common-api-gen/assets/v2/assets"
-	"github.com/datatrails/go-datatrails-common-api-gen/marshalers/simpleoneof"
+	v2assets "github.com/datatrails/go-datatrails-api/assets/v2/assets"
+	"github.com/datatrails/go-datatrails-api/marshalers/simpleoneof"
 	"github.com/zeebo/bencode"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
